@@ -6,8 +6,7 @@ void Projectile::draw() {
 }
 
 void Projectile::update() {
-    this->hitBox.box.x = this->position.first;
-    this->hitBox.box.y = this->position.second;
+   
 
     if (ID == 0) {
         this->position.first += this->speed * cos(this->angle * M_PI / 180);
@@ -18,6 +17,8 @@ void Projectile::update() {
         this->position.first += this->speed * cos(this->angle * M_PI / 180);
         this->position.second += this->speed * sin(this->angle * M_PI / 180);
     }
+         this->hitBox.box.x = this->position.first;
+         this->hitBox.box.y = this->position.second;
 
     if (this->position.second > GetScreenHeight() || this->position.second < 0) this->del = true;
 }

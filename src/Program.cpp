@@ -58,7 +58,13 @@ void Program::Update() {
         for (Projectile& p : Projectile::projectiles) { 
             p.update(); 
 
-        }
+          
+    // Phase 1: solo balas enemigas (player tiene ID=0)
+        if (p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox())) {
+            PlayerReset();     
+            break;             
+    }
+}
 
         if (lives <= 0 && pauseFrames <= 0) gameOver = true;
         Projectile::CleanProjectiles();
