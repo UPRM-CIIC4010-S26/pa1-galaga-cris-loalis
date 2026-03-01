@@ -186,11 +186,35 @@ void Program::PlayerReset() {
 
 void Program::Reset() {
     Enemy::enemies.clear();
+    Projectile::projectiles.clear();
     StdEnemy::attackInProgress = false;
     player = new Player((GetScreenWidth() / 2) - 15, GetScreenHeight() * 0.75f);
-    respawnCooldown = 1080;
+    respawnCooldown = 30;
     respawns = 0;
     count = 0;
     delay = 0;
     lives = 3;
-}
+
+    Enemy::enemies.push_back({
+        {350, 150},
+        new SpEnemy(350, 150)
+    });
+    Enemy::enemies.push_back({
+        {600, 150},
+        new SpEnemy(600, 150)
+    });
+        for (int i = 0; i < 30; i++) {
+            float x = 250 + 50 * (i % 10); 
+            float y = 200 + 50 * (i / 10);
+    
+            Enemy::enemies.push_back({
+                {x, y},
+                new StdEnemy(x, y)
+            });
+            gameOver = false;
+            paused = false; 
+            startup = false;
+            pauseFrames = 0;
+        }
+}      
+                
