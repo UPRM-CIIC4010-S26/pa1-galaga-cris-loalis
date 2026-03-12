@@ -29,21 +29,29 @@ Program::Program() {
 
 void Program::Update() {
     for (Animation& a : Animation::animations) a.update();
+
     for (int i = 0; i < Animation::animations.size(); i++) {
-        if (Animation::animations[i].done) Animation::animations.erase(Animation::animations.begin() + i);
+        if (Animation::animations[i].done)
+            Animation::animations.erase(Animation::animations.begin() + i);
     }
+
     pauseFrames = std::max(pauseFrames - 1, 0);
 
     if (!startup && !paused && !gameOver && pauseFrames <= 0) {
+
         Enemy::ManageEnemies(player->hitBox);
         StdEnemy::attackReset();
         ManageEnemyRespawns();
+        int difficultyReduction = score / 2000;  
+        respawnCooldown = std::max(1080 - difficultyReduction * 60, 300);
         player->update();
+
 
         for (std::pair<std::pair<float, float>, Enemy*> p : Enemy::enemies) {
             if (p.second && HitBox::Collision(player->hitBox, p.second->hitBox)) {
                 Animation::animations.push_back(
-                    Animation(player->position.first, player->position.second, 16, 0, 33, 34, 30 ,30, 3, ImageManager::SpriteSheet)
+                    Animation(player->position.first, player->position.second,
+                              16, 0, 33, 34, 30, 30, 3, ImageManager::SpriteSheet)
                 );
 
                 PlaySound(SoundManager::gameOver);
@@ -55,25 +63,39 @@ void Program::Update() {
             }
         }
 
-        for (Projectile& p : Projectile::projectiles) { 
-            p.update(); 
+        for (Projectile& p : Projectile::projectiles) {
+            p.update();
 
-          
-    // Phase 1: solo balas enemigas (player tiene ID=0)
-        if (p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox())) {
-            PlayerReset();     
-            break;             
-    }
-}
+            if (p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox())) {
+                PlayerReset();
+                break;
+            }
+        }
 
-        if (lives <= 0 && pauseFrames <= 0) gameOver = true;
+        if (score >= LifeScore && lives < 5) {
+            lives++;
+            LifeScore += 1000;
+        }
+
+        if (lives <= 0 && pauseFrames <= 0)
+            gameOver = true;
+
         Projectile::CleanProjectiles();
         Projectile::ProjectileCollision();
+    for (auto &p : Enemy::enemies) {
+    if (p.second && p.second->health <= 0) {
+        score += 100;
+        delete p.second;
+        p.second = nullptr;
     }
+    }
+}
 }
 
 void Program::Draw() {
     background.Draw();
+    DrawText(TextFormat("Score: %i", score), GetScreenWidth() - 200, 10, 20, WHITE);
+   
     if (pauseFrames <= 0 && !gameOver) player->draw();
     for (Animation& a : Animation::animations) a.draw();
 
@@ -169,7 +191,9 @@ void Program::KeyInputs() {
     }
 
     if (!startup && !paused && !gameOver && pauseFrames <= 0) player->keyInputs();
-   
+    if (IsKeyPressed('K')) {
+    score += 500;
+}
 }
 
 void Program::PlayerReset() {
@@ -184,6 +208,7 @@ void Program::PlayerReset() {
     lives--;
 }
 
+
 void Program::Reset() {
     Enemy::enemies.clear();
     Projectile::projectiles.clear();
@@ -194,6 +219,9 @@ void Program::Reset() {
     count = 0;
     delay = 0;
     lives = 3;
+    score = 0;
+    LifeScore = 1000;
+    
 
     Enemy::enemies.push_back({
         {350, 150},
