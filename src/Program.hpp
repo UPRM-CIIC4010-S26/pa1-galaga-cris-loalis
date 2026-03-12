@@ -38,6 +38,6 @@ class Program {
         void KeyInputs();
         void PlayerReset();
         void Reset();
-          
+        void AddScore(Enemy* enemey);
         ~Program() {}
 };

@@ -77,20 +77,52 @@ void Program::Update() {
             LifeScore += 1000;
         }
 
-        if (lives <= 0 && pauseFrames <= 0)
+        if (lives <= 0 && pauseFrames <= 0){
             gameOver = true;
+        }
+        for (Projectile& p : Projectile::projectiles) {
+    p.update();
 
+    // enemy projectile hits player
+    if (p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox())) {
+        PlayerReset();
+        break;
+    }
+
+    // player projectile hits enemy
+    if (p.ID == 0) {
+        for (std::pair<std::pair<float, float>, Enemy*>& e : Enemy::enemies) {
+            if (e.second && HitBox::Collision(p.getHitBox(), e.second->hitBox)) {
+                e.second->health--;
+                p.del = true;
+
+                if (e.second->health > 0) {
+                    PlaySound(SoundManager::hit);
+                } else {
+                    PlaySound(SoundManager::dead);
+
+                    if (dynamic_cast<SpEnemy*>(e.second)) {
+                        score += 100;
+                    }
+                    else if (dynamic_cast<StEnemy*>(e.second)) {
+                        score += 50;
+                    }
+                    else if (dynamic_cast<StdEnemy*>(e.second)) {
+                        score += 25;
+                    }
+                }
+
+                break;
+            }
+        }
+    }
+}
         Projectile::CleanProjectiles();
         Projectile::ProjectileCollision();
-    for (auto &p : Enemy::enemies) {
-    if (p.second && p.second->health <= 0) {
-        score += 100;
-        delete p.second;
-        p.second = nullptr;
-    }
+    
     }
 }
-}
+
 
 void Program::Draw() {
     background.Draw();
@@ -207,7 +239,17 @@ void Program::PlayerReset() {
     pauseFrames = 120;
     lives--;
 }
-
+void Program::AddScore(Enemy* enemy) {
+    if (dynamic_cast<SpEnemy*>(enemy)) {
+        score += 100;
+    }
+    else if (dynamic_cast<StEnemy*>(enemy)) {
+        score += 50;
+    }
+    else if (dynamic_cast<StdEnemy*>(enemy)) {
+        score += 25;
+    }
+}
 
 void Program::Reset() {
     Enemy::enemies.clear();
