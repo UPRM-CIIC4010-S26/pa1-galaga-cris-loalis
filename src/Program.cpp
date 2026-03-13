@@ -25,9 +25,15 @@ Program::Program() {
             new StdEnemy(x, y)
         });
     }
+    bgMusic = LoadMusicStream("takeonme.ogg");
+    SetMusicVolume(bgMusic, 0.5f);
+    PlayMusicStream(bgMusic);
 }
 
 void Program::Update() {
+
+    UpdateMusicStream(bgMusic);
+
     for (Animation& a : Animation::animations) a.update();
 
     for (int i = 0; i < Animation::animations.size(); i++) {
@@ -281,10 +287,16 @@ void Program::Reset() {
                 {x, y},
                 new StdEnemy(x, y)
             });
+        }
             gameOver = false;
             paused = false; 
             startup = false;
             pauseFrames = 0;
         }
-}      
+
+        Program::~Program() {
+    UnloadMusicStream(bgMusic);
+}
+        
+    
                 

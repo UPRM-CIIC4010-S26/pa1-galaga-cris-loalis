@@ -25,6 +25,7 @@ class Program {
         bool startup = true;
         bool paused = false;
         bool gameOver = false;
+        Music bgMusic;
 
     public:
         Program();
@@ -39,5 +40,5 @@ class Program {
         void PlayerReset();
         void Reset();
         void AddScore(Enemy* enemey);
-        ~Program() {}
+        ~Program();
 };
