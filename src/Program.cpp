@@ -49,7 +49,7 @@ void Program::Update() {
         StdEnemy::attackReset();
         ManageEnemyRespawns();
         int difficultyReduction = score / 2000;  
-        respawnCooldown = std::max(1080 - difficultyReduction * 60, 300);
+        
         player->update();
 
 
@@ -69,14 +69,6 @@ void Program::Update() {
             }
         }
 
-        for (Projectile& p : Projectile::projectiles) {
-            p.update();
-
-            if (p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox())) {
-                PlayerReset();
-                break;
-            }
-        }
 
         if (score >= LifeScore && lives < 5) {
             lives++;
@@ -89,13 +81,13 @@ void Program::Update() {
         for (Projectile& p : Projectile::projectiles) {
     p.update();
 
-    // enemy projectile hits player
+    
     if (p.ID != 0 && HitBox::Collision(player->hitBox, p.getHitBox())) {
         PlayerReset();
         break;
     }
 
-    // player projectile hits enemy
+    
     if (p.ID == 0) {
         for (std::pair<std::pair<float, float>, Enemy*>& e : Enemy::enemies) {
             if (e.second && HitBox::Collision(p.getHitBox(), e.second->hitBox)) {
@@ -103,32 +95,27 @@ void Program::Update() {
                 p.del = true;
 
                 if (e.second->health > 0) {
-                    PlaySound(SoundManager::hit);
-                } else {
-                    PlaySound(SoundManager::dead);
+    PlaySound(SoundManager::hit);
+} else {
+    PlaySound(SoundManager::dead);
 
-                    if (dynamic_cast<SpEnemy*>(e.second)) {
-                        score += 100;
-                    }
-                    else if (dynamic_cast<StEnemy*>(e.second)) {
-                        score += 50;
-                    }
-                    else if (dynamic_cast<StdEnemy*>(e.second)) {
-                        score += 25;
-                    }
-                }
+    AddScore(e.second);   
 
+    delete e.second;     
+    e.second = nullptr;   
+
+        }
                 break;
             }
-        }
     }
 }
-        Projectile::CleanProjectiles();
-        Projectile::ProjectileCollision();
     
     }
 }
+Projectile::CleanProjectiles();
+        Projectile::ProjectileCollision();
 
+    }
 
 void Program::Draw() {
     background.Draw();
@@ -157,7 +144,7 @@ void Program::ManageEnemyRespawns() {
 
     respawnCooldown -= 1;
     if (respawnCooldown <= 0) {
-        respawnCooldown = 1080;
+
         for (std::pair<std::pair<float, float>, Enemy*>& p : Enemy::enemies) {
             if (!p.second && p.first.second != 150) {
                 int eType = GetRandomValue(1, 3);
@@ -177,6 +164,8 @@ void Program::ManageEnemyRespawns() {
                 break;
             }
         }
+        int difficultyReduction = score / 2000;
+        respawnCooldown = std::max(1080 - difficultyReduction * 60, 300);
     }
 
     if(respawns >= 4) {
@@ -255,6 +244,7 @@ void Program::AddScore(Enemy* enemy) {
     else if (dynamic_cast<StdEnemy*>(enemy)) {
         score += 25;
     }
+
 }
 
 void Program::Reset() {
